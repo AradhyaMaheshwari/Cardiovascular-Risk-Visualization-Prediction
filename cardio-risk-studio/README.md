@@ -41,6 +41,8 @@ Use Python 3.12 and an internet connection for package installation and (for ful
 
 6. Open **http://127.0.0.1:8000**. The API docs are at **http://127.0.0.1:8000/docs**.
 
+The Cullet hot-glass landing page is available at **http://127.0.0.1:8000/cullet**.
+
 Run `uvicorn` from the `backend` directory because the serialized models reference the custom Python transformer as `common.FE`. Do not remove or rename `backend/common.py` unless you intentionally migrate/re-save the pipelines.
 
 ## Test the service

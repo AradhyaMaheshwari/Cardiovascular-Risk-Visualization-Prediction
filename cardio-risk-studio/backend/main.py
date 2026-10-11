@@ -246,6 +246,11 @@ def index() -> FileResponse:
     return FileResponse(FRONTEND_DIR / "index.html")
 
 
+@app.get("/cullet", include_in_schema=False)
+def cullet() -> FileResponse:
+    return FileResponse(FRONTEND_DIR / "cullet.html")
+
+
 @app.get("/api/health")
 def health() -> dict[str, Any]:
     return {

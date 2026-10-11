@@ -377,7 +377,95 @@ async function explainSelected() {
   }
 }
 
+function setupMetricCardSwap() {
+  const rail = $('#metric-grid');
+  const cards = [...rail.querySelectorAll('.metric-card')];
+  let order = cards.map((_, index) => index);
+  let swapping = false;
+  let timer;
+
+  const slot = index => {
+    const compact = window.matchMedia('(max-width: 900px)').matches;
+    const xStep = compact ? 16 : 28;
+    const yStep = compact ? 9 : 24;
+    const zStep = compact ? 20 : 36;
+    return {
+      transform: `translate(-50%, -50%) translate3d(${index * xStep}px, ${-index * yStep}px, ${-index * zStep}px) scale(${1 - index * 0.035}) skewY(${index * -0.4}deg)`,
+      opacity: String(1 - index * 0.1)
+    };
+  };
+  const place = (card, index) => {
+    const target = slot(index);
+    card.style.transform = target.transform;
+    card.style.opacity = target.opacity;
+    card.style.zIndex = String(cards.length - index);
+    card.style.pointerEvents = index === 0 ? 'auto' : 'none';
+    card.tabIndex = index === 0 ? 0 : -1;
+  };
+  const animate = async (card, transform, opacity, duration, easing) => {
+    const animation = card.animate(
+      [{ transform: card.style.transform, opacity: card.style.opacity }, { transform, opacity }],
+      { duration, easing, fill: 'forwards' }
+    );
+    try { await animation.finished; } catch { return; }
+    card.style.transform = transform;
+    card.style.opacity = opacity;
+    animation.cancel();
+  };
+  const layout = () => order.forEach((index, position) => place(cards[index], position));
+  const swap = async () => {
+    if (swapping || order.length < 2) return;
+    swapping = true;
+    const [front, ...rest] = order;
+    const ease = 'cubic-bezier(.16,1,.3,1)';
+    const moves = rest.map((index, position) => animate(
+      cards[index], slot(position).transform, slot(position).opacity, 850, ease
+    ));
+    cards[front].style.pointerEvents = 'none';
+    cards[front].tabIndex = -1;
+    const dropped = animate(
+      cards[front], 'translate(-50%, -50%) translate3d(0, 150%, 0) rotate(8deg) scale(.96)',
+      '0', 520, 'cubic-bezier(.65,0,.35,1)'
+    );
+    await Promise.all([...moves, dropped]);
+    order = [...rest, front];
+    order.forEach((index, position) => {
+      const card = cards[index];
+      card.style.zIndex = String(cards.length - position);
+      card.style.pointerEvents = position === 0 ? 'auto' : 'none';
+      card.tabIndex = position === 0 ? 0 : -1;
+      if (index !== front) {
+        const target = slot(position);
+        card.style.transform = target.transform;
+        card.style.opacity = target.opacity;
+      }
+    });
+    const back = slot(order.length - 1);
+    await animate(cards[front], back.transform, back.opacity, 850, ease);
+    swapping = false;
+  };
+  const startTimer = () => { clearInterval(timer); timer = window.setInterval(swap, 5000); };
+
+  layout();
+  rail.addEventListener('wheel', event => {
+    if (Math.abs(event.deltaY) < 1) return;
+    event.preventDefault();
+    swap();
+  }, { passive: false });
+  rail.addEventListener('keydown', event => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      swap();
+    }
+  });
+  rail.addEventListener('pointerenter', () => clearInterval(timer));
+  rail.addEventListener('pointerleave', startTimer);
+  window.addEventListener('resize', () => { if (!swapping) layout(); });
+  startTimer();
+}
+
 function setupInteractions() {
+  setupMetricCardSwap();
   $('#open-inputs-btn').addEventListener('click', () => openDrawer());
   $('#session-input-btn').addEventListener('click', () => openDrawer());
   $$('[data-action="open-inputs"]').forEach(button => button.addEventListener('click', () => openDrawer()));
