@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#101d31" />
+  <meta name="description" content="Cardio Risk Studio — an educational cardiovascular modeling and coronary-vessel visualization prototype." />
+  <title>Cardio Risk Studio · Cardiovascular Intelligence</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="app-frame">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#top" aria-label="Cardio Risk Studio home">
+        <span class="brand-symbol">
+          <svg viewBox="0 0 42 42" aria-hidden="true"><path d="M21 35.2S5.5 26 5.5 15.3C5.5 9.7 13.4 6.6 18 12.2L21 16l3-3.8c4.6-5.6 12.5-2.5 12.5 3.1C36.5 26 21 35.2 21 35.2Z" fill="currentColor" opacity=".18"/><path d="M4.5 22h8.2l4-7.2 5.1 14.4 4.2-9.3h11.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="brand-copy"><strong>cardio<span>lab</span></strong><small>RISK STUDIO <i>•</i> 01</small></span>
+      </a>
+
+      <div class="sidebar-caption">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <a class="nav-item active" href="#overview" data-nav="overview"><span class="nav-icon">▦</span><span>Overview</span><span class="nav-rail"></span></a>
+        <button class="nav-item" type="button" data-action="open-inputs"><span class="nav-icon">⌘</span><span>Patient inputs</span><span class="nav-count">55</span></button>
+        <a class="nav-item" href="#coronary-map" data-nav="coronary-map"><span class="nav-icon">◉</span><span>Coronary map</span></a>
+        <a class="nav-item" href="#explainability" data-nav="explainability"><span class="nav-icon">⌁</span><span>Explainability</span></a>
+      </nav>
+
+      <div class="sidebar-caption sidebar-caption--second">MODEL</div>
+      <div class="model-status-card">
+        <div class="status-orbit"><span></span></div>
+        <div><strong>Ensemble pipeline</strong><small id="sidebar-model-status">Connecting to API…</small></div>
+        <span class="status-dot" id="sidebar-status-dot"></span>
+      </div>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-note">
+        <span class="note-icon">i</span>
+        <p>Research prototype<br /><strong>Not for clinical decisions.</strong></p>
+      </div>
+      <div class="sidebar-footer"><span class="footer-dot"></span> LOCAL SESSION <span class="mono">v1.0</span></div>
+    </aside>
+
+    <main class="main-content" id="top">
+      <header class="topbar">
+        <div class="breadcrumbs"><span>Workspace</span><span class="crumb-slash">/</span><strong>Cardiovascular intelligence</strong></div>
+        <div class="topbar-right">
+          <div class="api-pill" id="api-pill"><span class="pulse-dot"></span><span id="api-status-text">Connecting</span></div>
+          <div class="topbar-divider"></div>
+          <div class="avatar" title="Demo workspace">CR</div>
+        </div>
+      </header>
+
+      <section class="page-heading" id="overview">
+        <div>
+          <div class="eyebrow"><span class="eyebrow-line"></span> MULTIMODAL AI · TRACK A</div>
+          <h1>Coronary <span>intelligence.</span></h1>
+          <p class="page-subtitle">Explore model-estimated outputs across the coronary tree, with every signal linked to its prediction pipeline.</p>
+        </div>
+        <div class="heading-actions">
+          <button class="button button--secondary" type="button" id="open-inputs-btn"><span class="button-icon">＋</span> Patient inputs <span class="button-count">55</span></button>
+          <button class="button button--primary" type="button" id="demo-run-btn"><span class="sparkle">✦</span> Try demo case</button>
+        </div>
+      </section>
+
+      <section class="metric-grid" id="metric-grid" aria-label="Model output summary">
+        <article class="metric-card metric-card--cath" data-target="Cath" tabindex="0" role="button" aria-label="Select overall CAD model output">
+          <div class="metric-top"><span class="metric-kicker">OVERALL CAD</span><span class="metric-symbol metric-symbol--cath">⌁</span></div>
+          <div class="metric-main"><strong class="metric-value" id="score-Cath">—</strong><span class="metric-unit">model score</span></div>
+          <div class="metric-track"><span id="bar-Cath"></span></div>
+          <div class="metric-bottom"><span id="status-Cath" class="metric-status">Awaiting input</span><span class="metric-threshold">T <b id="threshold-Cath">65%</b></span></div>
+        </article>
+        <article class="metric-card metric-card--lad" data-target="LAD" tabindex="0" role="button" aria-label="Select LAD model output">
+          <div class="metric-top"><span class="metric-kicker">LAD VESSEL</span><span class="metric-symbol metric-symbol--lad">↗</span></div>
+          <div class="metric-main"><strong class="metric-value" id="score-LAD">—</strong><span class="metric-unit">model score</span></div>
+          <div class="metric-track"><span id="bar-LAD"></span></div>
+          <div class="metric-bottom"><span id="status-LAD" class="metric-status">Awaiting input</span><span class="metric-threshold">T <b id="threshold-LAD">49%</b></span></div>
+        </article>
+        <article class="metric-card metric-card--lcx" data-target="LCX" tabindex="0" role="button" aria-label="Select LCX model output">
+          <div class="metric-top"><span class="metric-kicker">LCX VESSEL</span><span class="metric-symbol metric-symbol--lcx">⌁</span></div>
+          <div class="metric-main"><strong class="metric-value" id="score-LCX">—</strong><span class="metric-unit">model score</span></div>
+          <div class="metric-track"><span id="bar-LCX"></span></div>
+          <div class="metric-bottom"><span id="status-LCX" class="metric-status">Awaiting input</span><span class="metric-threshold">T <b id="threshold-LCX">39%</b></span></div>
+        </article>
+        <article class="metric-card metric-card--rca" data-target="RCA" tabindex="0" role="button" aria-label="Select RCA model output">
+          <div class="metric-top"><span class="metric-kicker">RCA VESSEL</span><span class="metric-symbol metric-symbol--rca">⌁</span></div>
+          <div class="metric-main"><strong class="metric-value" id="score-RCA">—</strong><span class="metric-unit">model score</span></div>
+          <div class="metric-track"><span id="bar-RCA"></span></div>
+          <div class="metric-bottom"><span id="status-RCA" class="metric-status">Awaiting input</span><span class="metric-threshold">T <b id="threshold-RCA">35%</b></span></div>
+        </article>
+      </section>
+
+      <section class="main-grid">
+        <article class="panel heart-panel" id="coronary-map">
+          <div class="panel-header panel-header--dark">
+            <div>
+              <div class="panel-eyebrow panel-eyebrow--light"><span class="live-indicator"></span> ANATOMICAL EXPLORER</div>
+              <h2>Coronary vessel map</h2>
+              <p>Interactive 3D schematic · anterior view</p>
+            </div>
+            <div class="scene-actions">
+              <span class="scene-badge"><span class="scene-badge-dot"></span> LIVE MODEL OUTPUT</span>
+              <button class="icon-button icon-button--dark" id="reset-view-btn" type="button" aria-label="Reset 3D view" title="Reset view"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.7-4L3 9m0-5v5h5M4 13a8 8 0 0 0 14.7 4L21 15m0 5v-5h-5"/></svg></button>
+            </div>
+          </div>
+          <div class="heart-stage" id="heart-stage">
+            <canvas id="heart-canvas" aria-label="Interactive three dimensional heart and coronary vessel schematic"></canvas>
+            <div class="stage-top-left"><span class="stage-cross">+</span><span>FRONT / ANTERIOR</span></div>
+            <div class="stage-top-right"><span class="axis-dot axis-dot--x"></span><span>X</span><span class="axis-dot axis-dot--y"></span><span>Y</span><span class="axis-dot axis-dot--z"></span><span>Z</span></div>
+            <div class="stage-center-label" id="stage-empty-state"><div class="stage-empty-icon">↗</div><strong>Awaiting a patient profile</strong><span>Run an assessment to color the vessels</span></div>
+            <div class="stage-bottom-left"><span class="control-key">DRAG</span> rotate <span class="control-separator">·</span><span class="control-key">SCROLL</span> zoom</div>
+            <div class="stage-bottom-right"><span class="stage-mini-dot"></span><span id="scene-mode-label">SCHEMATIC VIEW</span></div>
+          </div>
+          <div class="heart-panel-footer">
+            <div class="color-legend"><span class="legend-label">MODEL SCORE</span><span class="legend-gradient"></span><span class="legend-word">Lower</span><span class="legend-word">Higher</span></div>
+            <div class="vessel-selector" aria-label="Select vessel to inspect">
+              <button class="vessel-chip active" type="button" data-vessel="LAD"><span class="vessel-chip-dot dot-lad"></span>LAD</button>
+              <button class="vessel-chip" type="button" data-vessel="LCX"><span class="vessel-chip-dot dot-lcx"></span>LCX</button>
+              <button class="vessel-chip" type="button" data-vessel="RCA"><span class="vessel-chip-dot dot-rca"></span>RCA</button>
+            </div>
+          </div>
+        </article>
+
+        <div class="inspector-stack">
+          <article class="panel vessel-panel">
+            <div class="panel-header panel-header--compact">
+              <div><div class="panel-eyebrow">VESSEL INSPECTOR</div><h2 id="vessel-title">LAD <span class="vessel-full-name">· Left anterior descending</span></h2></div>
+              <span class="selected-tag" id="selected-tag">SELECTED</span>
+            </div>
+            <div class="vessel-score-row">
+              <div><span class="small-label">MODEL-ESTIMATED SCORE</span><div class="vessel-score-value" id="selected-score">—<span>%</span></div></div>
+              <div class="classification-chip classification-chip--idle" id="selected-classification">Awaiting input</div>
+            </div>
+            <div class="score-scale-wrap">
+              <div class="score-scale"><div class="score-scale-fill" id="selected-score-fill"></div><span class="threshold-marker" id="selected-threshold-marker"></span></div>
+              <div class="score-scale-foot"><span>0</span><span id="selected-threshold-label">Threshold · 49%</span><span>100</span></div>
+            </div>
+            <div class="vessel-divider"></div>
+            <div class="vessel-meta-row"><div><span class="small-label">DECISION THRESHOLD</span><strong id="selected-threshold">49%</strong></div><div><span class="small-label">CV ROC–AUC</span><strong id="selected-auc">0.853</strong></div></div>
+            <p class="panel-footnote">The threshold is a model setting from cross-validation, not a clinical cutoff.</p>
+          </article>
+
+          <article class="panel explain-panel" id="explainability">
+            <div class="panel-header panel-header--compact explain-heading">
+              <div><div class="panel-eyebrow">MODEL INTERPRETABILITY</div><h2>What shaped this score?</h2></div>
+              <span class="explain-icon">✳</span>
+            </div>
+            <div class="explain-toolbar"><label for="explain-target">Explain target</label><select id="explain-target" aria-label="Target for explanation"><option value="Cath">Overall CAD</option><option value="LAD">LAD vessel</option><option value="LCX">LCX vessel</option><option value="RCA">RCA vessel</option></select></div>
+            <div class="explain-empty" id="explain-empty"><div class="empty-spark">✳</div><strong>Explanation on demand</strong><p>Run an assessment, then inspect the features that influence a model score.</p></div>
+            <div class="explain-results" id="explain-results" hidden></div>
+            <div class="explain-footer"><span class="tiny-info">ⓘ Approximate Kernel SHAP</span><button class="text-button" type="button" id="explain-btn" disabled>Explain score <span>↗</span></button></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel evaluation-panel">
+          <div class="panel-header panel-header--compact">
+            <div><div class="panel-eyebrow">MODEL CARD</div><h2>Cross-validation snapshot</h2></div>
+            <span class="evaluation-badge">5-FOLD · REPEATED</span>
+          </div>
+          <div class="evaluation-rows" id="evaluation-rows">
+            <div class="evaluation-row"><span>Overall CAD</span><div class="eval-track"><span style="width:93.3%"></span></div><b>0.933</b></div>
+            <div class="evaluation-row"><span>LAD</span><div class="eval-track"><span style="width:85.3%"></span></div><b>0.853</b></div>
+            <div class="evaluation-row"><span>LCX</span><div class="eval-track"><span style="width:73.5%"></span></div><b>0.735</b></div>
+            <div class="evaluation-row"><span>RCA</span><div class="eval-track"><span style="width:75.7%"></span></div><b>0.757</b></div>
+          </div>
+          <div class="evaluation-note"><span>i</span> ROC–AUC values are from repeated stratified cross-validation on the development dataset, not independent external validation.</div>
+        </article>
+        <article class="panel session-panel">
+          <div class="panel-header panel-header--compact"><div><div class="panel-eyebrow">CURRENT SESSION</div><h2>Assessment workspace</h2></div><span class="session-orb">◌</span></div>
+          <div class="session-state"><div class="session-icon">⌘</div><div><strong id="session-title">No assessment run yet</strong><p id="session-description">Use a synthetic demo profile or enter the clinical features to evaluate the model pipelines.</p></div></div>
+          <div class="session-actions"><button class="button button--secondary button--small" type="button" id="session-input-btn">Edit patient inputs</button><span class="feature-counter"><b>55</b> input fields</span></div>
+        </article>
+      </section>
+
+      <footer class="page-footer"><div class="footer-brand"><span class="footer-heart">♡</span> CARDIOLAB <span class="footer-divider">/</span> RISK STUDIO</div><div class="footer-disclaimer"><span class="disclaimer-pill">EDUCATIONAL PROTOTYPE</span><p>Model-estimated outputs only. Not a diagnosis, not calibrated clinical risk, and not a substitute for a clinician or diagnostic imaging.</p></div><div class="footer-end">BUILT FOR MULTIMODAL AI · 2026</div></footer>
+    </main>
+  </div>
+
+  <div class="drawer-overlay" id="drawer-overlay" hidden>
+    <aside class="input-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <div class="drawer-header"><div><div class="panel-eyebrow">PATIENT DATA WORKSPACE</div><h2 id="drawer-title">Clinical input profile</h2><p>55 model inputs · values stay in this session</p></div><button class="icon-button" id="close-drawer-btn" type="button" aria-label="Close patient input drawer"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <div class="drawer-progress-wrap"><div class="drawer-progress-label"><span id="drawer-section-title">Patient profile</span><span id="drawer-field-count">5 fields</span></div><div class="drawer-progress"><span id="drawer-progress-fill" style="width:14.3%"></span></div></div>
+      <form id="patient-form" novalidate>
+        <div class="drawer-body"><nav class="group-nav" id="group-nav" aria-label="Input sections"></nav><div class="fields-scroll" id="fields-scroll"></div></div>
+        <div class="drawer-footer"><div class="privacy-note"><span>◈</span><p><strong>Not stored.</strong> Inputs are only sent to the prediction API when you run an assessment.</p></div><div class="drawer-actions"><button type="button" class="button button--text" id="reset-demo-btn">Restore demo values</button><button type="submit" class="button button--primary" id="run-analysis-btn">Run assessment <span>→</span></button></div></div>
+      </form>
+    </aside>
+  </div>
+
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <div class="global-loading" id="global-loading" hidden><div class="loading-card"><div class="loading-spinner"></div><strong id="loading-title">Running prediction models</strong><span id="loading-description">Evaluating four model pipelines…</span></div></div>
+
+  <script type="module" src="/assets/app.js"></script>
+</body>
+</html>

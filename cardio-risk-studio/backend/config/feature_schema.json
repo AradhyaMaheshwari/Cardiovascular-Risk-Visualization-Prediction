@@ -1,0 +1,1261 @@
+{
+  "title": "Cardiovascular risk input schema",
+  "sourceFeatures": 55,
+  "groups": [
+    {
+      "id": "profile",
+      "title": "Patient profile",
+      "eyebrow": "01",
+      "description": "Demographics and body measurements."
+    },
+    {
+      "id": "history",
+      "title": "Medical history",
+      "eyebrow": "02",
+      "description": "Recorded history and cardiovascular risk factors."
+    },
+    {
+      "id": "exam",
+      "title": "Clinical examination",
+      "eyebrow": "03",
+      "description": "Vitals and physical examination findings."
+    },
+    {
+      "id": "symptoms",
+      "title": "Symptoms",
+      "eyebrow": "04",
+      "description": "Reported symptoms and functional class."
+    },
+    {
+      "id": "ecg",
+      "title": "ECG findings",
+      "eyebrow": "05",
+      "description": "Recorded electrocardiographic features."
+    },
+    {
+      "id": "labs",
+      "title": "Laboratory results",
+      "eyebrow": "06",
+      "description": "Use the same units as the training dataset."
+    },
+    {
+      "id": "echo",
+      "title": "Echocardiography",
+      "eyebrow": "07",
+      "description": "Echo-derived measures and categorical findings."
+    }
+  ],
+  "fields": [
+    {
+      "key": "Age",
+      "label": "Age",
+      "group": "profile",
+      "type": "number",
+      "unit": "years",
+      "help": "Age in years.",
+      "trainingMin": 30.0,
+      "trainingMax": 86.0,
+      "order": 0,
+      "default": 58,
+      "step": 1,
+      "min": 18,
+      "max": 110,
+      "trainingRangeText": "Training data range: 30–86"
+    },
+    {
+      "key": "Weight",
+      "label": "Weight",
+      "group": "profile",
+      "type": "number",
+      "unit": "kg",
+      "help": "Weight in kilograms.",
+      "trainingMin": 48.0,
+      "trainingMax": 120.0,
+      "order": 1,
+      "default": 74,
+      "step": 1,
+      "min": 25,
+      "max": 300,
+      "trainingRangeText": "Training data range: 48–120"
+    },
+    {
+      "key": "Length",
+      "label": "Height",
+      "group": "profile",
+      "type": "number",
+      "unit": "cm",
+      "help": "Height as recorded in the dataset (column: Length).",
+      "trainingMin": 140.0,
+      "trainingMax": 188.0,
+      "order": 2,
+      "default": 165,
+      "step": 1,
+      "min": 100,
+      "max": 240,
+      "trainingRangeText": "Training data range: 140–188"
+    },
+    {
+      "key": "Sex",
+      "label": "Sex",
+      "group": "profile",
+      "type": "select",
+      "unit": "",
+      "help": "Encoded as Male = 1, Female = 0 in the training pipeline.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 3,
+      "default": "Male",
+      "options": [
+        {
+          "value": "Male",
+          "label": "Male"
+        },
+        {
+          "value": "Female",
+          "label": "Female"
+        }
+      ],
+      "trainingRangeText": ""
+    },
+    {
+      "key": "BMI",
+      "label": "Body mass index",
+      "group": "profile",
+      "type": "number",
+      "unit": "kg/m²",
+      "help": "Automatically recalculated from weight and height.",
+      "trainingMin": 18.115412710007302,
+      "trainingMax": 40.90065778377467,
+      "order": 4,
+      "default": 27.18,
+      "step": 0.1,
+      "min": 10,
+      "max": 80,
+      "trainingRangeText": "Training data range: 18.1154–40.9007",
+      "readonly": true
+    },
+    {
+      "key": "DM",
+      "label": "Diabetes mellitus",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Whether diabetes mellitus is recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 5,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "HTN",
+      "label": "Hypertension",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Whether hypertension is recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 6,
+      "default": 1,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Current Smoker",
+      "label": "Current smoker",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Current smoking status.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 7,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "EX-Smoker",
+      "label": "Former smoker",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Former smoking status.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 8,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "FH",
+      "label": "Family history",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Family history indicator as encoded in the dataset.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 9,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Obesity",
+      "label": "Obesity",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Obesity indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 10,
+      "default": 1,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "CRF",
+      "label": "Chronic renal failure",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Chronic renal failure recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 11,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "CVA",
+      "label": "Cerebrovascular disease",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "CVA history recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 12,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Airway disease",
+      "label": "Airway disease",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Airway disease recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 13,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Thyroid Disease",
+      "label": "Thyroid disease",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Thyroid disease recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 14,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "CHF",
+      "label": "Congestive heart failure",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "CHF recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 15,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "DLP",
+      "label": "Dyslipidaemia",
+      "group": "history",
+      "type": "binary",
+      "unit": "",
+      "help": "Dyslipidaemia recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 16,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "BP",
+      "label": "Blood pressure",
+      "group": "exam",
+      "type": "number",
+      "unit": "mmHg",
+      "help": "Dataset field BP; confirm the source convention before clinical interpretation.",
+      "trainingMin": 90.0,
+      "trainingMax": 190.0,
+      "order": 17,
+      "default": 130,
+      "step": 1,
+      "min": 50,
+      "max": 300,
+      "trainingRangeText": "Training data range: 90–190"
+    },
+    {
+      "key": "PR",
+      "label": "Pulse rate",
+      "group": "exam",
+      "type": "number",
+      "unit": "bpm",
+      "help": "Pulse rate.",
+      "trainingMin": 50.0,
+      "trainingMax": 110.0,
+      "order": 18,
+      "default": 70,
+      "step": 1,
+      "min": 20,
+      "max": 250,
+      "trainingRangeText": "Training data range: 50–110"
+    },
+    {
+      "key": "Edema",
+      "label": "Edema",
+      "group": "exam",
+      "type": "binary",
+      "unit": "",
+      "help": "Edema finding.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 19,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Weak Peripheral Pulse",
+      "label": "Weak peripheral pulse",
+      "group": "exam",
+      "type": "binary",
+      "unit": "",
+      "help": "Physical examination finding.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 20,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Lung rales",
+      "label": "Lung rales",
+      "group": "exam",
+      "type": "binary",
+      "unit": "",
+      "help": "Lung rales recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 21,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Systolic Murmur",
+      "label": "Systolic murmur",
+      "group": "exam",
+      "type": "binary",
+      "unit": "",
+      "help": "Systolic murmur recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 22,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Diastolic Murmur",
+      "label": "Diastolic murmur",
+      "group": "exam",
+      "type": "binary",
+      "unit": "",
+      "help": "Diastolic murmur recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 23,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Typical Chest Pain",
+      "label": "Typical chest pain",
+      "group": "symptoms",
+      "type": "binary",
+      "unit": "",
+      "help": "Typical chest pain recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 24,
+      "default": 1,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Dyspnea",
+      "label": "Dyspnea",
+      "group": "symptoms",
+      "type": "binary",
+      "unit": "",
+      "help": "Dyspnea recorded.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 25,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Function Class",
+      "label": "Functional class",
+      "group": "symptoms",
+      "type": "select",
+      "unit": "",
+      "help": "Dataset functional class code, 0–3. Preserve the source coding.",
+      "trainingMin": 0.0,
+      "trainingMax": 3.0,
+      "order": 26,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "Class 0"
+        },
+        {
+          "value": 1,
+          "label": "Class 1"
+        },
+        {
+          "value": 2,
+          "label": "Class 2"
+        },
+        {
+          "value": 3,
+          "label": "Class 3"
+        }
+      ],
+      "min": 0,
+      "max": 3,
+      "trainingRangeText": "Training data range: 0–3"
+    },
+    {
+      "key": "Atypical",
+      "label": "Atypical chest pain",
+      "group": "symptoms",
+      "type": "binary",
+      "unit": "",
+      "help": "Atypical symptom indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 27,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Nonanginal",
+      "label": "Non-anginal symptoms",
+      "group": "symptoms",
+      "type": "binary",
+      "unit": "",
+      "help": "Non-anginal symptom indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 28,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Exertional CP",
+      "label": "Exertional chest pain",
+      "group": "symptoms",
+      "type": "constant",
+      "unit": "",
+      "help": "Fixed to No because all records in the training workbook have this value.",
+      "trainingMin": 0.0,
+      "trainingMax": 0.0,
+      "order": 29,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        }
+      ],
+      "disabled": true,
+      "min": 0,
+      "max": 0,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "LowTH Ang",
+      "label": "Low-threshold angina",
+      "group": "symptoms",
+      "type": "binary",
+      "unit": "",
+      "help": "Use the source dataset's indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 30,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Q Wave",
+      "label": "Q wave",
+      "group": "ecg",
+      "type": "binary",
+      "unit": "",
+      "help": "ECG feature indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 31,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "St Elevation",
+      "label": "ST elevation",
+      "group": "ecg",
+      "type": "binary",
+      "unit": "",
+      "help": "ECG feature indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 32,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "St Depression",
+      "label": "ST depression",
+      "group": "ecg",
+      "type": "binary",
+      "unit": "",
+      "help": "ECG feature indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 33,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Tinversion",
+      "label": "T-wave inversion",
+      "group": "ecg",
+      "type": "binary",
+      "unit": "",
+      "help": "ECG feature indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 34,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "LVH",
+      "label": "Left ventricular hypertrophy",
+      "group": "ecg",
+      "type": "binary",
+      "unit": "",
+      "help": "ECG feature indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 35,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "Poor R Progression",
+      "label": "Poor R-wave progression",
+      "group": "ecg",
+      "type": "binary",
+      "unit": "",
+      "help": "ECG feature indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 36,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "min": 0,
+      "max": 1,
+      "trainingRangeText": ""
+    },
+    {
+      "key": "BBB",
+      "label": "Bundle branch block",
+      "group": "ecg",
+      "type": "select",
+      "unit": "",
+      "help": "The training code groups LBBB/RBBB into a single present/absent indicator.",
+      "trainingMin": 0.0,
+      "trainingMax": 1.0,
+      "order": 37,
+      "default": "N",
+      "options": [
+        {
+          "value": "N",
+          "label": "None"
+        },
+        {
+          "value": "LBBB",
+          "label": "LBBB"
+        },
+        {
+          "value": "RBBB",
+          "label": "RBBB"
+        }
+      ],
+      "trainingRangeText": ""
+    },
+    {
+      "key": "FBS",
+      "label": "Fasting blood sugar",
+      "group": "labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "help": "Fasting blood sugar.",
+      "trainingMin": 62.0,
+      "trainingMax": 400.0,
+      "order": 38,
+      "default": 98,
+      "step": 1,
+      "min": 20,
+      "max": 1000,
+      "trainingRangeText": "Training data range: 62–400"
+    },
+    {
+      "key": "CR",
+      "label": "Creatinine",
+      "group": "labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "help": "Dataset field CR.",
+      "trainingMin": 0.5,
+      "trainingMax": 2.2,
+      "order": 39,
+      "default": 1.0,
+      "step": 0.1,
+      "min": 0.1,
+      "max": 20,
+      "trainingRangeText": "Training data range: 0.5–2.2"
+    },
+    {
+      "key": "TG",
+      "label": "Triglycerides",
+      "group": "labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "help": "Triglycerides.",
+      "trainingMin": 37.0,
+      "trainingMax": 1050.0,
+      "order": 40,
+      "default": 122,
+      "step": 1,
+      "min": 10,
+      "max": 3000,
+      "trainingRangeText": "Training data range: 37–1050"
+    },
+    {
+      "key": "LDL",
+      "label": "LDL cholesterol",
+      "group": "labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "help": "LDL cholesterol.",
+      "trainingMin": 18.0,
+      "trainingMax": 232.0,
+      "order": 41,
+      "default": 100,
+      "step": 1,
+      "min": 1,
+      "max": 1000,
+      "trainingRangeText": "Training data range: 18–232"
+    },
+    {
+      "key": "HDL",
+      "label": "HDL cholesterol",
+      "group": "labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "help": "HDL cholesterol.",
+      "trainingMin": 15.9,
+      "trainingMax": 111.0,
+      "order": 42,
+      "default": 39.0,
+      "step": 0.1,
+      "min": 1,
+      "max": 300,
+      "trainingRangeText": "Training data range: 15.9–111"
+    },
+    {
+      "key": "BUN",
+      "label": "Blood urea nitrogen",
+      "group": "labs",
+      "type": "number",
+      "unit": "mg/dL",
+      "help": "BUN.",
+      "trainingMin": 6.0,
+      "trainingMax": 52.0,
+      "order": 43,
+      "default": 16,
+      "step": 1,
+      "min": 1,
+      "max": 200,
+      "trainingRangeText": "Training data range: 6–52"
+    },
+    {
+      "key": "ESR",
+      "label": "Erythrocyte sedimentation rate",
+      "group": "labs",
+      "type": "number",
+      "unit": "mm/h",
+      "help": "ESR.",
+      "trainingMin": 1.0,
+      "trainingMax": 90.0,
+      "order": 44,
+      "default": 15,
+      "step": 1,
+      "min": 0,
+      "max": 200,
+      "trainingRangeText": "Training data range: 1–90"
+    },
+    {
+      "key": "HB",
+      "label": "Hemoglobin",
+      "group": "labs",
+      "type": "number",
+      "unit": "g/dL",
+      "help": "Hemoglobin.",
+      "trainingMin": 8.9,
+      "trainingMax": 17.6,
+      "order": 45,
+      "default": 13.2,
+      "step": 0.1,
+      "min": 3,
+      "max": 25,
+      "trainingRangeText": "Training data range: 8.9–17.6"
+    },
+    {
+      "key": "K",
+      "label": "Potassium",
+      "group": "labs",
+      "type": "number",
+      "unit": "mmol/L",
+      "help": "Potassium.",
+      "trainingMin": 3.0,
+      "trainingMax": 6.6,
+      "order": 46,
+      "default": 4.2,
+      "step": 0.1,
+      "min": 1,
+      "max": 12,
+      "trainingRangeText": "Training data range: 3–6.6"
+    },
+    {
+      "key": "Na",
+      "label": "Sodium",
+      "group": "labs",
+      "type": "number",
+      "unit": "mmol/L",
+      "help": "Sodium.",
+      "trainingMin": 128.0,
+      "trainingMax": 156.0,
+      "order": 47,
+      "default": 141,
+      "step": 1,
+      "min": 100,
+      "max": 200,
+      "trainingRangeText": "Training data range: 128–156"
+    },
+    {
+      "key": "WBC",
+      "label": "White blood cells",
+      "group": "labs",
+      "type": "number",
+      "unit": "cells/µL",
+      "help": "White blood cell count.",
+      "trainingMin": 3700.0,
+      "trainingMax": 18000.0,
+      "order": 48,
+      "default": 7100,
+      "step": 1,
+      "min": 100,
+      "max": 100000,
+      "trainingRangeText": "Training data range: 3700–18000"
+    },
+    {
+      "key": "Lymph",
+      "label": "Lymphocytes",
+      "group": "labs",
+      "type": "number",
+      "unit": "%",
+      "help": "Lymphocyte percentage.",
+      "trainingMin": 7.0,
+      "trainingMax": 60.0,
+      "order": 49,
+      "default": 32,
+      "step": 1,
+      "min": 0,
+      "max": 100,
+      "trainingRangeText": "Training data range: 7–60"
+    },
+    {
+      "key": "Neut",
+      "label": "Neutrophils",
+      "group": "labs",
+      "type": "number",
+      "unit": "%",
+      "help": "Neutrophil percentage.",
+      "trainingMin": 32.0,
+      "trainingMax": 89.0,
+      "order": 50,
+      "default": 60,
+      "step": 1,
+      "min": 0,
+      "max": 100,
+      "trainingRangeText": "Training data range: 32–89"
+    },
+    {
+      "key": "PLT",
+      "label": "Platelets",
+      "group": "labs",
+      "type": "number",
+      "unit": "10³/µL",
+      "help": "Platelet count as represented in the dataset.",
+      "trainingMin": 25.0,
+      "trainingMax": 742.0,
+      "order": 51,
+      "default": 210,
+      "step": 1,
+      "min": 1,
+      "max": 2000,
+      "trainingRangeText": "Training data range: 25–742"
+    },
+    {
+      "key": "EF-TTE",
+      "label": "Ejection fraction (TTE)",
+      "group": "echo",
+      "type": "number",
+      "unit": "%",
+      "help": "Ejection fraction as recorded in the dataset.",
+      "trainingMin": 15.0,
+      "trainingMax": 60.0,
+      "order": 52,
+      "default": 50,
+      "step": 1,
+      "min": 0,
+      "max": 100,
+      "trainingRangeText": "Training data range: 15–60"
+    },
+    {
+      "key": "Region RWMA",
+      "label": "Region with RWMA",
+      "group": "echo",
+      "type": "select",
+      "unit": "",
+      "help": "Regional wall motion abnormality code (0–4); not a 3D lesion coordinate.",
+      "trainingMin": 0.0,
+      "trainingMax": 4.0,
+      "order": 53,
+      "default": 0,
+      "options": [
+        {
+          "value": 0,
+          "label": "0 · none"
+        },
+        {
+          "value": 1,
+          "label": "1"
+        },
+        {
+          "value": 2,
+          "label": "2"
+        },
+        {
+          "value": 3,
+          "label": "3"
+        },
+        {
+          "value": 4,
+          "label": "4"
+        }
+      ],
+      "min": 0,
+      "max": 4,
+      "trainingRangeText": "Training data range: 0–4"
+    },
+    {
+      "key": "VHD",
+      "label": "Valvular heart disease",
+      "group": "echo",
+      "type": "select",
+      "unit": "",
+      "help": "Ordinal category encoded N=0, mild=1, moderate=2, severe=3.",
+      "trainingMin": 0.0,
+      "trainingMax": 3.0,
+      "order": 54,
+      "default": "mild",
+      "options": [
+        {
+          "value": "N",
+          "label": "None"
+        },
+        {
+          "value": "mild",
+          "label": "Mild"
+        },
+        {
+          "value": "Moderate",
+          "label": "Moderate"
+        },
+        {
+          "value": "Severe",
+          "label": "Severe"
+        }
+      ],
+      "trainingRangeText": ""
+    }
+  ],
+  "disclaimer": "Educational prototype only. Outputs are model-estimated scores, not a diagnosis or validated clinical risk probabilities."
+}
