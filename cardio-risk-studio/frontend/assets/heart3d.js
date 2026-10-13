@@ -11,18 +11,12 @@ import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
  *  vessel centre-lines are mathematically attached to the myocardial surface.
  * ------------------------------------------------------------------ */
 
-const SCORE_COLORS = [new THREE.Color('#48d9bd'), new THREE.Color('#f0bf6d'), new THREE.Color('#ff7183')];
+const VESSEL_COLORS = { LAD: '#37d5ff', LCX: '#bd83ff', RCA: '#ffd166' };
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
 const gauss = (x, w) => Math.exp(-(x * x) / (w * w));
 const adiff = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
 const DEG = Math.PI / 180;
-
-function scoreColor(score) {
-  const s = clamp(Number(score ?? 0), 0, 1);
-  if (s < 0.5) return SCORE_COLORS[0].clone().lerp(SCORE_COLORS[1], s * 2);
-  return SCORE_COLORS[1].clone().lerp(SCORE_COLORS[2], (s - 0.5) * 2);
-}
 
 /* ---------------- tiny JS value-noise for geometry displacement ---------------- */
 function hash3(x, y, z) {
@@ -499,7 +493,7 @@ export class HeartScene {
     const group = new THREE.Group();
     group.userData.vessel = key;
     group.name = `coronary-${key}`;
-    const color = scoreColor(0.35);
+    const color = new THREE.Color(VESSEL_COLORS[key]);
     this.vesselMats[key] = [];
     branches.forEach((b, index) => {
       const pts = b.pts.map(([a, t]) => surfacePoint(a, t, b.lift));
@@ -516,14 +510,14 @@ export class HeartScene {
       this.vesselMats[key].push({ core: coreMat, glow: glowMat, trunk: index === 0 });
     });
     this.beat.add(group);
-    this.updateVesselColor(key, null);
+    this.updateVesselColor(key);
     return group;
   }
 
-  updateVesselColor(key, score) {
+  updateVesselColor(key) {
     const mats = this.vesselMats[key];
     if (!mats) return;
-    const c = score == null ? new THREE.Color('#7f95aa') : scoreColor(score);
+    const c = new THREE.Color(VESSEL_COLORS[key] || '#7f95aa');
     mats.forEach(({ core, glow }) => { core.color.copy(c).multiplyScalar(0.8); core.emissive.copy(c); glow.color.copy(c); });
     this._refreshSelectionStyle();
   }
@@ -531,15 +525,20 @@ export class HeartScene {
   updateScores(predictions) {
     if (!predictions) return;
     this.scores = predictions;
-    ['LAD', 'LCX', 'RCA'].forEach(key => this.updateVesselColor(key, predictions[key]?.score ?? null));
+    ['LAD', 'LCX', 'RCA'].forEach(key => this.updateVesselColor(key));
   }
 
   _refreshSelectionStyle() {
     Object.entries(this.vesselMats).forEach(([name, mats]) => {
       const sel = name === this.selected, hov = name === this.hovered;
+      const score = this.scores[name]?.score;
+      const level = score == null ? 0 : clamp(Number(score), 0, 1);
+      const color = new THREE.Color(VESSEL_COLORS[name] || '#7f95aa');
       mats.forEach(({ core, glow }) => {
-        core.emissiveIntensity = sel ? 0.45 : hov ? 0.36 : 0.26;
-        glow.opacity = sel ? 0.30 : hov ? 0.22 : (this.scores[name]?.score != null ? 0.12 : 0.06);
+        core.color.copy(color).multiplyScalar(sel ? 1 : 0.62);
+        core.emissive.copy(color);
+        core.emissiveIntensity = sel ? 1.25 : hov ? 0.5 : 0.18 + level * 0.08;
+        glow.opacity = sel ? 0.7 : hov ? 0.3 : score != null ? 0.08 + level * 0.06 : 0.025;
       });
     });
   }

@@ -7,14 +7,15 @@ An interactive cardiovascular modeling prototype that serves the four finalized 
 ## What's included
 
 - **Web UI:** responsive dashboard, patient input workflow for all 55 expected model features, four output cards, cross-validation model card, score inspector, and explainability panel.
-- **3D renderer:** Three.js/WebGL scene with rotatable/zoomable heart and separately selectable LAD, LCX, and RCA tubes. Vessel tube colors respond to the corresponding model score. If the Three.js CDN cannot be reached, an interactive vector schematic fallback is used.
+- **Frontend:** Vite, React, TypeScript, and Tailwind CSS for the interactive navigation; shared UI components live in `frontend/src/components/ui` and can be imported from `@/components/ui`.
+- **3D renderer:** Three.js/WebGL scene with rotatable/zoomable heart and separately selectable LAD, LCX, and RCA tubes. Vessel tube colors respond to the corresponding model score. If WebGL is unavailable, an interactive vector schematic fallback is used.
 - **API:** FastAPI endpoints for health, schema, synthetic demo profile, model prediction, and approximate Kernel SHAP explanation.
 - **Final model pipelines:** the four `.pkl` files supplied in this conversation, with `common.py` retained beside the backend to provide the custom `FE` transformer referenced by the pickles.
 - **Configuration:** feature order, thresholds, input schema, user-provided CV metrics, a synthetic reference profile, and 24 feature-only background rows for SHAP.
 
 ## Run locally on Windows
 
-Use Python 3.12 and an internet connection for package installation and (for full WebGL) loading Three.js from the CDN.
+Use Python 3.12 and Node.js for dependency installation and frontend builds. Three.js is bundled locally with the frontend.
 
 1. Extract the project ZIP.
 2. Open PowerShell in the extracted `cardio-risk-studio` folder.
@@ -25,11 +26,15 @@ Use Python 3.12 and an internet connection for package installation and (for ful
    .\.venv\Scripts\Activate.ps1
    ```
 
-4. Install backend dependencies:
+4. Install backend and frontend dependencies and build the React navigation:
 
    ```powershell
    python -m pip install --upgrade pip
    python -m pip install -r backend/requirements.txt
+   cd frontend
+   npm install
+   npm run build
+   cd ..
    ```
 
 5. Start the app from the backend folder:
@@ -42,6 +47,8 @@ Use Python 3.12 and an internet connection for package installation and (for ful
 6. Open **http://127.0.0.1:8000**. The API docs are at **http://127.0.0.1:8000/docs**.
 
 The Cullet hot-glass landing page is available at **http://127.0.0.1:8000/cullet**.
+
+For frontend development, start the backend in one terminal, then run `cd frontend && npm run dev` in another. Vite serves the React navigation and proxies `/api` requests to FastAPI. The built frontend is served by FastAPI after `npm run build`.
 
 Run `uvicorn` from the `backend` directory because the serialized models reference the custom Python transformer as `common.FE`. Do not remove or rename `backend/common.py` unless you intentionally migrate/re-save the pipelines.
 
@@ -59,14 +66,14 @@ The demo profile is synthetic and must remain labelled as such. Inputs are not p
 
 ## Deployment to Render
 
-This repository is designed as a single web service: FastAPI serves both the JSON API and the static frontend on the same origin. That avoids a separate frontend build and avoids CORS configuration for the standard deployment.
+This repository runs as a single web service: Vite builds the React navigation and FastAPI serves the built frontend and JSON API on the same origin.
 
 1. Push the complete extracted folder to a GitHub repository. Keep `backend/models/`, `backend/common.py`, and `backend/config/` in the repository because they are required at runtime.
 2. In Render, create a new **Web Service** and connect the repository.
 3. Set the build command to:
 
    ```bash
-   pip install -r backend/requirements.txt
+   pip install -r backend/requirements.txt && cd frontend && npm ci && npm run build
    ```
 
 4. Set the start command to:
@@ -94,7 +101,7 @@ A `render.yaml` Blueprint file is included for reference. If deploying using Ren
 
 The heart mesh and great vessels are generated in Three.js, with separate user-selectable coronary tubes for LAD, LCX, and RCA. They are positioned for visualization only. Model outputs are target-level classifications/scores, not spatial lesion labels, so the renderer does **not** claim to locate stenoses or depict measured narrowing.
 
-Three.js is imported from jsDelivr by `frontend/index.html`. If you want a fully offline build, vendor the same Three.js version and its controls module into the project and update the import map. The fallback schematic still renders if the CDN cannot be loaded, but the full WebGL scene requires the CDN.
+Three.js and its controls are included in the frontend bundle. The vector fallback remains available when WebGL cannot initialize.
 
 ## Explainability notes
 

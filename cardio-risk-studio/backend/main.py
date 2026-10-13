@@ -32,6 +32,7 @@ APP_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = APP_DIR.parent
 FRONTEND_DIR = PROJECT_DIR / "frontend"
 ASSETS_DIR = FRONTEND_DIR / "assets"
+BUILD_DIR = FRONTEND_DIR / "dist"
 CONFIG_DIR = APP_DIR / "config"
 MODEL_DIR = APP_DIR / "models"
 TARGETS = ["Cath", "LAD", "LCX", "RCA"]
@@ -75,6 +76,8 @@ app = FastAPI(
     version="1.0.0",
 )
 app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
+if (BUILD_DIR / "build").is_dir():
+    app.mount("/build", StaticFiles(directory=str(BUILD_DIR / "build")), name="frontend-build")
 
 
 class PredictRequest(BaseModel):
@@ -243,7 +246,8 @@ def score_target(target: str, frame: pd.DataFrame) -> dict[str, Any]:
 
 @app.get("/", include_in_schema=False)
 def index() -> FileResponse:
-    return FileResponse(FRONTEND_DIR / "index.html")
+    built_index = BUILD_DIR / "index.html"
+    return FileResponse(built_index if built_index.is_file() else FRONTEND_DIR / "index.html")
 
 
 @app.get("/cullet", include_in_schema=False)
