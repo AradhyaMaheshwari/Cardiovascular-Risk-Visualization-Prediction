@@ -105,6 +105,22 @@ function buildForm() {
       recalculateBMI();
     }
   });
+  form.addEventListener('click', event => {
+    const trigger = event.target.closest('.choice-select__trigger');
+    if (trigger) {
+      const wrapper = trigger.closest('.choice-select');
+      const shouldOpen = trigger.getAttribute('aria-expanded') !== 'true';
+      closeChoiceMenus();
+      if (shouldOpen) openChoiceMenu(wrapper);
+      return;
+    }
+    const option = event.target.closest('.choice-select__option');
+    if (option) chooseSelectOption(option);
+  });
+  form.addEventListener('keydown', handleChoiceKeydown);
+  document.addEventListener('pointerdown', event => {
+    if (!event.target.closest('.choice-select')) closeChoiceMenus();
+  });
   form.addEventListener('submit', async event => {
     event.preventDefault();
     await runAssessment(readFeaturesFromForm(), state.syntheticMode);
@@ -128,13 +144,79 @@ function renderField(field) {
   } else if (field.type === 'constant') {
     control = `<input type="hidden" name="${escapeHtml(key)}" value="0"><div class="binary-toggle"><input type="radio" id="f-${slug}-no" checked disabled><label for="f-${slug}-no">No · fixed</label><input type="radio" id="f-${slug}-yes" disabled><label for="f-${slug}-yes">Yes</label></div>`;
   } else if (field.type === 'select') {
-    control = `<select name="${escapeHtml(key)}" id="f-${slug}" aria-label="${escapeHtml(field.label)}">${(field.options || []).map(opt => `<option value="${escapeHtml(opt.value)}" ${String(opt.value) === String(field.default) ? 'selected' : ''}>${escapeHtml(opt.label)}</option>`).join('')}</select>`;
+    const options = (field.options || []).map((opt, index) => `<button class="choice-select__option" type="button" role="option" id="f-${slug}-option-${index}" data-value="${escapeHtml(opt.value)}" aria-selected="${String(opt.value) === String(field.default)}">${escapeHtml(opt.label)}<span aria-hidden="true">✓</span></button>`).join('');
+    const selectedLabel = field.options?.find(opt => String(opt.value) === String(field.default))?.label || field.options?.[0]?.label || '';
+    control = `<div class="choice-select"><select class="choice-select__native" name="${escapeHtml(key)}" id="f-${slug}-native" tabindex="-1" aria-hidden="true">${(field.options || []).map(opt => `<option value="${escapeHtml(opt.value)}" ${String(opt.value) === String(field.default) ? 'selected' : ''}>${escapeHtml(opt.label)}</option>`).join('')}</select><button class="choice-select__trigger" id="f-${slug}" type="button" aria-label="${escapeHtml(field.label)}" aria-haspopup="listbox" aria-expanded="false" aria-controls="f-${slug}-list"><span>${escapeHtml(selectedLabel)}</span><i aria-hidden="true"></i></button><div class="choice-select__menu" id="f-${slug}-list" role="listbox" aria-label="${escapeHtml(field.label)}" hidden>${options}</div></div>`;
   } else {
     control = `<input type="number" name="${escapeHtml(key)}" id="f-${slug}" value="${escapeHtml(field.default)}" min="${field.min ?? ''}" max="${field.max ?? ''}" step="${field.step ?? 1}" ${field.readonly ? 'readonly' : ''} required aria-label="${escapeHtml(field.label)}">`;
   }
   const hint = field.help && field.type !== 'constant' && !field.trainingRangeText ? field.help : (field.type === 'constant' ? field.help : '');
   const description = hint ? `<p class="field-helper">${escapeHtml(hint)}</p>` : helper;
   return `<div class="form-field ${field.type === 'constant' ? 'form-field--wide' : ''}"><div class="field-label-row"><label for="f-${slug}">${escapeHtml(field.label)}</label>${unit}</div><div class="field-control ${field.readonly || field.type === 'constant' ? 'field-control--readonly' : ''}">${control}</div>${description}</div>`;
+}
+function syncChoiceSelect(select) {
+  const wrapper = select?.closest('.choice-select');
+  if (!wrapper) return;
+  const selected = select.options[select.selectedIndex];
+  wrapper.querySelector('.choice-select__trigger span').textContent = selected?.textContent || '';
+  wrapper.querySelectorAll('.choice-select__option').forEach(option => {
+    option.setAttribute('aria-selected', String(option.dataset.value === select.value));
+  });
+}
+function openChoiceMenu(wrapper) {
+  if (!wrapper) return;
+  const trigger = wrapper.querySelector('.choice-select__trigger');
+  const menu = wrapper.querySelector('.choice-select__menu');
+  const select = wrapper.querySelector('select');
+  menu.hidden = false;
+  trigger.setAttribute('aria-expanded', 'true');
+  const selected = [...menu.querySelectorAll('.choice-select__option')].find(option => option.dataset.value === select.value);
+  (selected || menu.querySelector('.choice-select__option'))?.focus();
+}
+function closeChoiceMenus(returnFocus = false) {
+  $$('.choice-select', $('#patient-form')).filter(wrapper => wrapper.querySelector('.choice-select__trigger[aria-expanded="true"]')).forEach(wrapper => {
+    const trigger = wrapper.querySelector('.choice-select__trigger');
+    wrapper.querySelector('.choice-select__menu').hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    if (returnFocus) trigger.focus();
+  });
+}
+function chooseSelectOption(option) {
+  const wrapper = option.closest('.choice-select');
+  const select = wrapper?.querySelector('select');
+  if (!select) return;
+  select.value = option.dataset.value;
+  syncChoiceSelect(select);
+  select.dispatchEvent(new Event('input', { bubbles: true }));
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+  closeChoiceMenus(true);
+}
+function handleChoiceKeydown(event) {
+  const trigger = event.target.closest('.choice-select__trigger');
+  const option = event.target.closest('.choice-select__option');
+  if (trigger && ['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) {
+    event.preventDefault();
+    const wrapper = trigger.closest('.choice-select');
+    if (trigger.getAttribute('aria-expanded') !== 'true') openChoiceMenu(wrapper);
+    else wrapper.querySelector('.choice-select__option')?.focus();
+    return;
+  }
+  if (!option) return;
+  const options = [...option.closest('.choice-select__menu').querySelectorAll('.choice-select__option')];
+  const index = options.indexOf(option);
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    options[(index + (event.key === 'ArrowDown' ? 1 : options.length - 1)) % options.length]?.focus();
+  } else if (event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    options[event.key === 'Home' ? 0 : options.length - 1]?.focus();
+  } else if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    chooseSelectOption(option);
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+    closeChoiceMenus(true);
+  } else if (event.key === 'Tab') closeChoiceMenus();
 }
 function slugify(value) { return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 
@@ -196,7 +278,10 @@ function populateForm(features) {
       if (hidden) hidden.value = 0;
     } else {
       const control = $(`[name="${CSS.escape(key)}"]`, $('#patient-form'));
-      if (control) control.value = val;
+      if (control) {
+        control.value = val;
+        if (field.type === 'select') syncChoiceSelect(control);
+      }
     }
   });
   recalculateBMI();
