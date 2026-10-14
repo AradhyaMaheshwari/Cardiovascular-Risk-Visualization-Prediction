@@ -4,6 +4,7 @@ import { flushSync } from 'react-dom';
 import './index.css';
 import { HeaderNav } from './HeaderNav';
 import { PredictionCardDeck } from './PredictionCardDeck';
+import '../assets/styles.css';
 
 const root = document.getElementById('nav-root');
 if (!root) throw new Error('Missing #nav-root mount point');

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { gsap } from 'gsap';
 import { IoCloseOutline, IoMenuOutline } from 'react-icons/io5';
@@ -161,7 +161,8 @@ export function PillNav({
     const commonProps = {
       className: mobile ? 'pill-mobile-link glass-button' : 'pill-link glass-button',
       'aria-label': item.ariaLabel || item.label,
-      onClick: () => {
+      onClick: (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+        if (item.onClick) event.preventDefault();
         item.onClick?.();
         if (mobile) closeMobileMenu();
       },

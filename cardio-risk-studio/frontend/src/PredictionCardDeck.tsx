@@ -1,75 +1,82 @@
 import { useEffect, useState } from 'react';
-import { Card, CardSwap } from '@/components/ui/card-swap';
 
-const predictions = [
-  { target: 'Cath', vessel: 'OVERALL CAD', symbol: '⌁', className: 'cath', threshold: '65%' },
-  { target: 'LAD', vessel: 'LAD VESSEL', symbol: '↗', className: 'lad', threshold: '49%' },
-  { target: 'LCX', vessel: 'LCX VESSEL', symbol: '⌁', className: 'lcx', threshold: '39%' },
-  { target: 'RCA', vessel: 'RCA VESSEL', symbol: '⌁', className: 'rca', threshold: '35%' },
+type Target = 'Cath' | 'LAD' | 'LCX' | 'RCA';
+type Prediction = { score: number; prediction: number; threshold: number };
+
+const predictions: Array<{
+  target: Target;
+  title: string;
+  vessel: string;
+  symbol: string;
+  className: string;
+  threshold: number;
+  auc: string;
+}> = [
+  { target: 'Cath', title: 'Overall CAD', vessel: 'Overall coronary artery disease', symbol: '⌁', className: 'cath', threshold: 0.65, auc: '0.933' },
+  { target: 'LAD', title: 'LAD', vessel: 'Left anterior descending', symbol: '↗', className: 'lad', threshold: 0.49, auc: '0.853' },
+  { target: 'LCX', title: 'LCX', vessel: 'Left circumflex', symbol: '⌁', className: 'lcx', threshold: 0.39, auc: '0.735' },
+  { target: 'RCA', title: 'RCA', vessel: 'Right coronary artery', symbol: '⌁', className: 'rca', threshold: 0.35, auc: '0.757' },
 ];
 
-function selectTarget(target: string) {
+function selectTarget(target: Target) {
   document.dispatchEvent(new CustomEvent('cardio:select-target', { detail: { target } }));
 }
 
 export function PredictionCardDeck() {
-  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [results, setResults] = useState<Partial<Record<Target, Prediction>>>({});
+  const item = predictions[activeIndex];
+  const result = results[item.target];
+  const score = result ? result.score * 100 : null;
+  const threshold = result?.threshold ?? item.threshold;
+  const aboveThreshold = result ? Boolean(result.prediction) : null;
 
   useEffect(() => {
-    const update = () => setViewportWidth(window.innerWidth);
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    const handlePredictions = (event: Event) => {
+      const next = (event as CustomEvent<Partial<Record<Target, Prediction>> | null>).detail;
+      setResults(next || {});
+    };
+    document.addEventListener('cardio:prediction-update', handlePredictions);
+    return () => document.removeEventListener('cardio:prediction-update', handlePredictions);
   }, []);
 
-  const compact = viewportWidth <= 600;
-  const cardWidth = compact
-    ? 'min(80vw, 440px)'
-    : viewportWidth <= 900
-      ? 'min(calc(100vw - 120px), 600px)'
-      : viewportWidth <= 1050
-        ? 'min(calc(41vw - 10px), 440px)'
-        : 'min(calc(100vw - min(47vw, 790px) - 147px), 980px)';
+  const move = (step: number) => {
+    const nextIndex = (activeIndex + step + predictions.length) % predictions.length;
+    setActiveIndex(nextIndex);
+    selectTarget(predictions[nextIndex].target);
+  };
 
   return (
-    <CardSwap
-      width={cardWidth}
-      height="min(54svh, 440px)"
-      cardDistance={compact ? 9 : 13}
-      verticalDistance={compact ? 8 : 10}
-      skewAmount={1}
-      easing="linear"
-      onCardClick={(index) => selectTarget(predictions[index].target)}
-    >
-      {predictions.map(({ target, vessel, symbol, className, threshold }) => (
-        <Card
-          key={target}
-          customClass={`metric-card metric-card--${className}`}
-          data-target={target}
-          role="button"
-          tabIndex={0}
-          aria-label={`Select ${vessel} prediction card`}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              event.currentTarget.click();
-            }
-          }}
-        >
-          <div className="metric-top">
-            <span className="metric-kicker">{vessel}</span>
-            <span className={`metric-symbol metric-symbol--${className}`}>{symbol}</span>
+    <section className="metric-carousel" aria-label="Model output carousel" aria-roledescription="carousel">
+      <button className="metric-carousel-arrow" type="button" aria-label="Previous model output" onClick={() => move(-1)}>‹</button>
+      <article className={`metric-card metric-card--${item.className} metric-carousel-card active`} data-target={item.target} aria-live="polite" aria-label={`${item.title} model output, ${activeIndex + 1} of ${predictions.length}`}>
+        <div className="metric-carousel-heading">
+          <div>
+            <span className="metric-kicker">{item.title}</span>
+            <p className="metric-carousel-vessel">{item.vessel}</p>
           </div>
-          <div className="metric-main">
-            <strong className="metric-value" id={`score-${target}`}>—</strong>
-            <span className="metric-unit">model score</span>
+          <span className={`metric-symbol metric-symbol--${item.className}`} aria-hidden="true">{item.symbol}</span>
+        </div>
+        <div className="metric-carousel-scoreline">
+          <div>
+            <span className="small-label">MODEL-ESTIMATED SCORE</span>
+            <strong className="metric-carousel-score">{score === null ? '—' : `${score.toFixed(1)}%`}</strong>
           </div>
-          <div className="metric-track"><span id={`bar-${target}`} /></div>
-          <div className="metric-bottom">
-            <span id={`status-${target}`} className="metric-status">Awaiting input</span>
-            <span className="metric-threshold">T <b id={`threshold-${target}`}>{threshold}</b></span>
-          </div>
-        </Card>
-      ))}
-    </CardSwap>
+          <span className={`metric-carousel-status ${aboveThreshold === null ? '' : aboveThreshold ? 'positive' : 'negative'}`}>
+            {aboveThreshold === null ? 'Awaiting input' : aboveThreshold ? 'Above threshold' : 'Below threshold'}
+          </span>
+        </div>
+        <div className="metric-carousel-track" role="meter" aria-label={`${item.title} model score`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={score ?? 0}>
+          <span style={{ width: `${score ?? 0}%` }} />
+          <i style={{ left: `${threshold * 100}%` }} />
+        </div>
+        <div className="metric-carousel-details">
+          <div><span>DECISION THRESHOLD</span><strong>{(threshold * 100).toFixed(0)}%</strong></div>
+          <div><span>CV ROC–AUC</span><strong>{item.auc}</strong></div>
+          <span className="metric-carousel-count">{String(activeIndex + 1).padStart(2, '0')} <i>/</i> {String(predictions.length).padStart(2, '0')}</span>
+        </div>
+      </article>
+      <button className="metric-carousel-arrow" type="button" aria-label="Next model output" onClick={() => move(1)}>›</button>
+    </section>
   );
 }
