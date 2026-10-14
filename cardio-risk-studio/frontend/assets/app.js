@@ -9,6 +9,7 @@ const state = {
   schema: null, fields: [], groups: [], defaults: {}, demo: null,
   syntheticMode: false, lastFeatures: null, predictions: null, selectedVessel: 'LAD', explainTarget: 'Cath',
   heart: null, renderer: 'starting', explaining: false, assessing: false,
+  activeView: 'overview', previousView: 'overview',
 };
 
 function escapeHtml(value) {
@@ -157,6 +158,31 @@ function openDrawer(groupId = null) {
 function closeDrawer() {
   $('#drawer-overlay').hidden = true;
   document.body.style.overflow = '';
+  if (state.activeView === 'inputs') switchView(state.previousView);
+}
+function switchView(view) {
+  const validViews = ['overview', 'inputs', 'coronary', 'explainability'];
+  if (!validViews.includes(view)) return;
+  if (view === 'inputs') {
+    if (state.activeView !== 'inputs') state.previousView = state.activeView;
+    state.activeView = 'inputs';
+    document.body.dataset.view = 'inputs';
+    document.dispatchEvent(new CustomEvent('cardio:view-change', { detail: view }));
+    openDrawer();
+    return;
+  }
+  state.activeView = view;
+  document.body.dataset.view = view;
+  document.dispatchEvent(new CustomEvent('cardio:view-change', { detail: view }));
+  const heading = {
+    overview: ['Coronary <span>intelligence.</span>', 'Explore model-estimated outputs across the coronary tree, with every signal linked to its prediction pipeline.'],
+    coronary: ['Coronary <span>vessel map.</span>', 'Explore the interactive coronary schematic and inspect model-linked vessel outputs.'],
+    explainability: ['Model <span>explainability.</span>', 'Review approximate feature contributions for the selected model output.'],
+  }[view];
+  if (heading) {
+    $('.heading-title').innerHTML = heading[0];
+    $('.page-subtitle').textContent = heading[1];
+  }
 }
 function populateForm(features) {
   state.fields.forEach(field => {
@@ -215,12 +241,7 @@ function invalidateAssessment() {
 }
 
 function setMetricIdle() {
-  TARGETS.forEach(target => {
-    $(`#score-${target}`).textContent = '—';
-    $(`#bar-${target}`).style.width = '0%';
-    $(`#status-${target}`).textContent = 'Awaiting input';
-    $(`#status-${target}`).className = 'metric-status';
-  });
+  document.dispatchEvent(new CustomEvent('cardio:prediction-update', { detail: null }));
   $('#selected-score').innerHTML = '—<span>%</span>';
   $('#selected-classification').textContent = 'Awaiting input';
   $('#selected-classification').className = 'classification-chip classification-chip--idle';
@@ -231,16 +252,7 @@ function setMetricIdle() {
 }
 
 function updateMetrics(predictions) {
-  TARGETS.forEach(target => {
-    const item = predictions[target];
-    if (!item) return;
-    $(`#score-${target}`).textContent = formatPercent(item.score);
-    $(`#bar-${target}`).style.width = `${Math.max(0, Math.min(100, item.score * 100))}%`;
-    const status = $(`#status-${target}`);
-    status.textContent = item.prediction ? 'Above threshold' : 'Below threshold';
-    status.className = `metric-status ${item.prediction ? 'positive' : 'negative'}`;
-    $(`#threshold-${target}`).textContent = formatPercent(item.threshold, 0);
-  });
+  document.dispatchEvent(new CustomEvent('cardio:prediction-update', { detail: predictions }));
   $('#stage-empty-state').classList.add('hidden');
   $('#explain-btn').disabled = false;
   $$('.metric-card').forEach(card => card.classList.toggle('active', card.dataset.target === state.explainTarget));
@@ -389,9 +401,10 @@ async function explainSelected() {
 }
 
 function setupInteractions() {
-  $('#open-inputs-btn').addEventListener('click', () => openDrawer());
-  $('#session-input-btn').addEventListener('click', () => openDrawer());
-  document.addEventListener('cardio:open-inputs', () => openDrawer());
+  $('#open-inputs-btn').addEventListener('click', () => switchView('inputs'));
+  $('#session-input-btn').addEventListener('click', () => switchView('inputs'));
+  document.addEventListener('cardio:open-inputs', () => switchView('inputs'));
+  document.addEventListener('cardio:navigate', event => switchView(event.detail?.view));
   $('#close-drawer-btn').addEventListener('click', closeDrawer);
   $('#drawer-overlay').addEventListener('click', event => { if (event.target === $('#drawer-overlay')) closeDrawer(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('#drawer-overlay').hidden) closeDrawer(); });
@@ -419,10 +432,6 @@ async function initialize() {
     state.groups = schema.groups;
     state.defaults = Object.fromEntries(schema.fields.map(f => [f.key, f.default]));
     state.demo = demo.features;
-    $('#threshold-Cath').textContent = formatPercent(schema.thresholds.Cath,0);
-    $('#threshold-LAD').textContent = formatPercent(schema.thresholds.LAD,0);
-    $('#threshold-LCX').textContent = formatPercent(schema.thresholds.LCX,0);
-    $('#threshold-RCA').textContent = formatPercent(schema.thresholds.RCA,0);
     $('#selected-auc').textContent = formatAuc(schema.cvMetrics.LAD.roc_auc);
     renderEvaluation(schema.cvMetrics);
     buildForm();
