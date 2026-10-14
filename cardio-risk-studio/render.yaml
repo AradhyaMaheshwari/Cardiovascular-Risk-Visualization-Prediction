@@ -1,6 +1,7 @@
 services:
   - type: web
     name: cardio-risk-studio
+    rootDir: cardio-risk-studio
     runtime: python
     plan: free
     buildCommand: pip install -r backend/requirements.txt && cd frontend && npm ci && npm run build
